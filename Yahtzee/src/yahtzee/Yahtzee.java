@@ -1,6 +1,7 @@
 package yahtzee;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -11,212 +12,211 @@ public class Yahtzee {
     static Scanner scan = new Scanner(System.in);
         
     static Random rand = new Random();
-        
-    static boolean gameOn = true;
-    static boolean diceOneHeld = false;
-    static boolean diceTwoHeld = false;
-    static boolean diceThreeHeld = false;
-    static boolean diceFourHeld = false;
-    static boolean diceFiveHeld = false;
-    static String input;
-    static String output;
-    static boolean hasRolled = false;
-        
-    // order is 0: Ones, 1: Twos, 2: Threes, 3: Fours, 4: Fives, 5: Sixes, 6: Three Of A Kind, 7: Four Of A Kind, 8: Full House, 9: Small Straight, 10: Large Straight, 11: Yahtzee, 12: Chance
-    static int[] userScores = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-    static int[] currentScores = {0,0,0,0,0,0,0,0,0,0,0,0,0};
-    static int[] diceValues = {0,0,0,0,0};
+    
+    static final int NUMBER_OF_DICE = 5;
+    
+    static ArrayList<Player> players = new ArrayList<>();
+
+    static int[] diceValues = new int[NUMBER_OF_DICE];
+    static boolean[] diceHeld = new boolean[NUMBER_OF_DICE];
+
+    static final String[] ENTREES = {"Ones", "Twos","Threes", "Fours", "Fives", "Sixes", "Three Of A Kind", "Four Of A Kind", "Full House",
+                               "Small Straight", "Large Straight", "Yahtzee", "Chance"};
+    
+    static int[] currentPossibleValues = new int[ENTREES.length];
 
     public static void main(String[] args) {
-        System.out.println("Welcome to Yahtzee!");
-
-        while (gameOn) {
-            
-            int rollsLeft = 3;
-                  
-            System.out.println("New Round. Type \"Roll\" to roll!");
+        
+        for (int i = 0; i < NUMBER_OF_DICE; i++) {
+            diceValues[i] = 0;
+            diceHeld[i] = false;
+        }
+        
+        for (int i = 0; i < ENTREES.length; i++) {
+            currentPossibleValues[i] = 0;
+        }
+        
+        System.out.println("Add Player by typing their name! Otherwise, type \"Start\" to start playing!");
+        
+        String input = "";
+        
+        while (true) {
             input = scan.nextLine();
             
-            if (input.equals("Roll")) {
-                rollDice();
-            } else {
-                System.out.println("invalid!");
-                continue;
+            if ("Start".equals(input)) {
+                break;
             }
             
-            
-            rollsLeft--;
-            
-            diceOneHeld = false;
-            diceTwoHeld = false;
-            diceThreeHeld = false;
-            diceFourHeld = false;
-            diceFiveHeld = false;
-            boolean picked = false;
-            
-            while (!picked) {
-                
-                output = calculateChoices();
-                System.out.println("Dices:" + Arrays.toString(diceValues));
-                System.out.println(output);
-                
-                System.out.println("Please Enter your choice. Either enter \"Roll\" to roll. Enter numbers 1 2 3 etc to hold a dice, or select points to win. You have " + rollsLeft + " rolls left");
-                
-                input = scan.nextLine();
-                
-                if (input.contains(String.valueOf(1))) {
-                    diceOneHeld = true;
-                }
-                if (input.contains(String.valueOf(2))) {
-                    diceTwoHeld = true;
-                }
-                if (input.contains(String.valueOf(3))) {
-                    diceThreeHeld = true;
-                }
-                if (input.contains(String.valueOf(4))) {
-                    System.out.println("4!");
-                    diceFourHeld = true;
-                }
-                if (input.contains(String.valueOf(5))) {
-                    diceFiveHeld = true;
-                    
-                }
-                
-                if (diceOneHeld || diceTwoHeld || diceThreeHeld || diceFourHeld || diceFiveHeld) {
-                    
-                    if (rollsLeft > 0) {
-                        rollDice();
-                    
-                        diceOneHeld = false; 
-                        diceTwoHeld = false; 
-                        diceThreeHeld = false; 
-                        diceFourHeld = false; 
-                        diceFiveHeld = false;
-                        rollsLeft--;
-                        continue;
-                    } else {
-                        System.out.println("You don't have any rolls left this turn.");
-                    }
-                }
-                
-                switch (input) {
-                    case "Roll":  
-                        if (rollsLeft > 0) {
-                            rollDice();
-                    
-                            diceOneHeld = false; 
-                            diceTwoHeld = false; 
-                            diceThreeHeld = false; 
-                            diceFourHeld = false; 
-                            diceFiveHeld = false;
-                            rollsLeft--;
-                            break;
-                        } else {
-                            System.out.println("You don't have any rolls left this turn.");
-                        }
-                        
-                    case "Ones": addValues(0); rollsLeft = 0; picked = true; break;
-                    case "Twos": addValues(1); rollsLeft = 0; picked = true; break;
-                    case "Threes": addValues(2); rollsLeft = 0; picked = true; break;
-                    case "Fours": addValues(3); rollsLeft = 0; picked = true; break;
-                    case "Fives": addValues(4); rollsLeft = 0; picked = true; break;
-                    case "Sixes": addValues(5); rollsLeft = 0; picked = true; break;
-                    case "Three Of A Kind": addValues(6); rollsLeft = 0; picked = true; break;
-                    case "Four Of A Kind": addValues(7); rollsLeft = 0; picked = true; break;
-                    case "Full House": addValues(8); rollsLeft = 0; picked = true; break;
-                    case "Small Straight": addValues(9); rollsLeft = 0; picked = true; break;
-                    case "Large Straight": addValues(10); rollsLeft = 0; picked = true; break;
-                    case "Yahtzee": addValues(11); rollsLeft = 0; picked = true; break;
-                    case "Chance": addValues(12); rollsLeft = 0; picked = true; break;
-                    default: break;
-                    }
-                }
-            
-            System.out.println(Arrays.toString(userScores));
-            }  
+            players.add(new Player(input));
         }
+        
+        RunGame();
+    }
+        
     
-    static public void addValues(int index) {
-        if (userScores[index] == -1) {
-            userScores[index] = currentScores[index];
-        } else {
-            System.out.println("You already have this.");
+    static public void RunGame() {
+        
+        String input;
+        String output;
+        int rollsLeft; // 3 rolls in yahtzee
+        
+        System.out.println("Welcome to Yahtzee!");
+        
+        boolean loop = true;
+        
+        //loop until all players are out of entrees
+        while (loop) {
+            
+            //go through each player and let them play their turn
+            for (Player player : players) {
+                
+                //if a player has a full card, skip their turn
+                if (player.fullCard()) {
+                    continue;
+                }
+                //reset all variables for new turn
+                resetHeld();
+            
+                rollsLeft = 3;
+                
+                System.out.println("It is " + player.getName() + "'s turn! Rolling...");
+                
+                rollDice();
+                
+                while (rollsLeft > 0) {
+
+                    System.out.println("Dices: " + Arrays.toString(diceValues));
+                    output = calculateChoices(player);
+                    System.out.println(output);
+                
+                    System.out.println("Please choose to either reroll with \"Roll\", choose to hold dice with \"124\", or choose points to enter by typing its name");
+                
+                    input = scan.nextLine();
+                    
+                    boolean roll = false;
+                    //get dice held
+                    for (int i = 0; i < diceHeld.length; i++) {
+                        if (input.contains(String.valueOf(i + 1))) {
+                            diceHeld[i] = true;
+                            //automatically roll
+                            roll = true;
+                        }
+                    }
+
+                   
+                    if (input.equals("Roll") || roll) {
+                        
+                        rollDice();
+                        
+                        //reset variables and decrease remaining roles
+                        resetHeld();
+                        rollsLeft--;
+                        
+                        //loop back
+                        continue;
+                    }
+                    
+                    //check all entrees
+                    for (int i = 0; i < ENTREES.length; i++) {
+                        
+                        if (input.equals(ENTREES[i])) {
+                            if (player.getValue(ENTREES[i]) == -1) {
+                                //update users score card
+                                player.setValue(ENTREES[i], currentPossibleValues[i]);
+                                //set rollsLeft to 0 to exit loop
+                                rollsLeft = 0;
+                                
+                            } else {
+                                System.out.println("You already have this entree on your card");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            //check if any players have 
+            loop = false;
+            
+            for (Player player : players) {
+                if (!player.fullCard()) {
+                    loop = true;
+                }
+            }
         }
+        
+        for (Player player : players) {
+            System.out.println(player.getTotal());
+        }
+    }
+    
+    static public void resetHeld() {
+        Arrays.fill(diceHeld, false);
     }
     
     static public void rollDice() {
-        if (!diceOneHeld) {
-            diceValues[0] = rand.nextInt(6) + 1;
+        //go through each dice  
+        for (int i = 0; i < NUMBER_OF_DICE; i++) {
+            //if the dice isn't being held back, reroll it
+            if (!diceHeld[i]) {
+                diceValues[i] = rand.nextInt(6) + 1;
+            }
         }
-        if (!diceTwoHeld) {
-            diceValues[1] = rand.nextInt(6) + 1;
-        }
-        if (!diceThreeHeld) {
-            diceValues[2] = rand.nextInt(6) + 1;
-        }
-        if (!diceFourHeld) {
-            diceValues[3] = rand.nextInt(6) + 1;
-        }
-        if (!diceFiveHeld) {
-            diceValues[4] = rand.nextInt(6) + 1;
-        }
-
     }
 
-    static public String calculateChoices() {
+    static public String calculateChoices(Player player) {
         String output = "";
 
         //Upper Section
-        output += getNumber(1, "Ones", 0);
-        output += getNumber(2, "Twos", 1);
-        output += getNumber(3, "Threes", 2);
-        output += getNumber(4, "Fours", 3);
-        output += getNumber(5, "Fives", 4);
-        output += getNumber(6, "Sixes", 5);
+        output += getNumber(1, "Ones", 0, player);
+        output += getNumber(2, "Twos", 1, player);
+        output += getNumber(3, "Threes", 2, player);
+        output += getNumber(4, "Fours", 3, player);
+        output += getNumber(5, "Fives", 4, player);
+        output += getNumber(6, "Sixes", 5, player);
         
         //Lower Section
         
         //Three of a Kind
-        output += getOfAKind(3, "Three Of A Kind", 6);
+        output += getOfAKind(3, "Three Of A Kind", 6, player);
         
         //Four Of A Kind
-        output += getOfAKind(4, "Four Of A Kind", 7);
+        output += getOfAKind(4, "Four Of A Kind", 7, player);
         
         //Full House
-        output += getFullHouse();
+        output += getFullHouse(player);
         
         //Small Straight
-        output += getSmallStraight();
+        output += getSmallStraight(player);
         
         //Large Straight
-        output += getLargeStraight();
+        output += getLargeStraight(player);
         
         //Yahtzee!!
-        output += getOfAKind(5, "Yahtzee!", 11);
+        output += getOfAKind(5, "Yahtzee", 11, player);
         
         //Chance
-        output += getChance();
+        output += getChance(player);
         
         return output;
     }
     
-    static public String getNumber(int value, String name, int index) {
+    static public String getNumber(int value, String name, int index, Player player) {
         int amount = 0;
         
-        if (userScores[index] == -1) {
+        if (player.getValue(name) == -1) {
             for (int dice : diceValues) {
                 if (dice == value) {
                     amount += value;
                 }
             }        
-            currentScores[index] = amount;
+            currentPossibleValues[index] = amount;
             return " " + name + ": " + amount;
             
         }
         return "";
     }
     
-    static public String getOfAKind(int max, String name, int index) {
+    static public String getOfAKind(int max, String name, int index, Player player) {
         int amount = 0;
         int one = 0;
         int two = 0;
@@ -225,7 +225,7 @@ public class Yahtzee {
         int five = 0;
         int six = 0;
         
-        if (userScores[index] == -1) {
+        if (player.getValue(name) == -1) {
             for (int dice : diceValues) {
                 if (dice == 1) {
                     one++;
@@ -252,18 +252,18 @@ public class Yahtzee {
                     amount += dice;
                 }
             }
-            currentScores[index] = amount;
+            currentPossibleValues[index] = amount;
             return "\n" + name + ": " + amount;
         }
     return "";
     }
             
-    public static String getFullHouse() {
+    public static String getFullHouse(Player player) {
         int one = 0;
         int oneAmount = 0;
         int two = 0;
         int twoAmount = 0;
-        if (userScores[8] == -1) {
+        if (player.getValue("Full House") == -1) {
     
             one = diceValues[0];
             
@@ -280,11 +280,12 @@ public class Yahtzee {
                 }
             }
             
-            if (oneAmount == 2 && twoAmount == 3 || oneAmount == 3 && twoAmount == 2) {
-                currentScores[8] = 25;
+            //in this context, a full house is anytime you have 2 of one value, and number of dice - 2 of another.
+            if (oneAmount == NUMBER_OF_DICE - 2 && twoAmount == 2 || oneAmount == 2 && twoAmount == NUMBER_OF_DICE - 2) {
+                currentPossibleValues[8] = 25;
                 return "\nFull House: 25";
             } else {
-                currentScores[8] = 0;
+                currentPossibleValues[8] = 0;
                 return "\nFull House: 0";
             } 
         }
@@ -292,7 +293,7 @@ public class Yahtzee {
         return "";
     }
     
-    public static String getSmallStraight() {
+    public static String getSmallStraight(Player player) {
         
         boolean one = false;
         boolean two = false;
@@ -301,7 +302,7 @@ public class Yahtzee {
         boolean five = false;
         boolean six = false;
         
-        if (userScores[9] == -1) {
+        if (player.getValue("Small Straight") == -1) {
             
             for (int dice : diceValues) {
                 if (dice == 1) {
@@ -325,17 +326,17 @@ public class Yahtzee {
             }
             
             if (one && two && three && four || two && three && four && five || three && four && five && six) {
-                currentScores[9] = 30;
+                currentPossibleValues[9] = 30;
                 return ("\nSmall Straight: 30");
             } else {
-                currentScores[9] = 0;
+                currentPossibleValues[9] = 0;
                 return ("\nSmall Straight: 0");
             }
         }
         return "";
     }
     
-    public static String getLargeStraight(){
+    public static String getLargeStraight(Player player){
         boolean one = false;
         boolean two = false;
         boolean three = false;
@@ -343,7 +344,7 @@ public class Yahtzee {
         boolean five = false;
         boolean six = false;
         
-        if (userScores[10] == -1) {
+        if (player.getValue("Large Straight") == -1) {
             
             for (int dice : diceValues) {
                 if (dice == 1) {
@@ -367,22 +368,23 @@ public class Yahtzee {
             }
             
             if (one && two && three && four && five || two && three && four && five && six) {
-                currentScores[10] = 40;
+                currentPossibleValues[9] = 40;
                 return ("\nLarge Straight: 40");
             } else {
-                currentScores[10] = 0;
+                currentPossibleValues[9] = 0;
                 return ("\nLarge Straight: 0");
             }
         }
         return "";
     }
     
-    public static String getChance() {
+    public static String getChance(Player player) {
         int amount = 0;
-        if (userScores[12] == -1) {
+        if (player.getValue("Chance") == -1) {
             for (int dice : diceValues) {
                 amount += dice;
             }
+            currentPossibleValues[12] = amount;
             return ("\nChance: " + amount);
         }
         return "";
