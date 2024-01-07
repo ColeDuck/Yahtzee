@@ -27,19 +27,22 @@ public class Yahtzee {
 
     public static void main(String[] args) {
         
+        //populate arrays with their default state
         for (int i = 0; i < NUMBER_OF_DICE; i++) {
             diceValues[i] = 0;
             diceHeld[i] = false;
         }
         
+        //populate array with its default state
         for (int i = 0; i < ENTREES.length; i++) {
             currentPossibleValues[i] = 0;
         }
         
         System.out.println("Add Player by typing their name! Otherwise, type \"Start\" to start playing!");
         
-        String input = "";
+        String input;
         
+        //add players
         while (true) {
             input = scan.nextLine();
             
@@ -168,14 +171,13 @@ public class Yahtzee {
 
         //Upper Section
         output += getNumber(1, "Ones", 0, player);
-        output += getNumber(2, "Twos", 1, player);
-        output += getNumber(3, "Threes", 2, player);
-        output += getNumber(4, "Fours", 3, player);
-        output += getNumber(5, "Fives", 4, player);
-        output += getNumber(6, "Sixes", 5, player);
+        output += " " + getNumber(2, "Twos", 1, player);
+        output += " " + getNumber(3, "Threes", 2, player);
+        output += " " + getNumber(4, "Fours", 3, player);
+        output += " " + getNumber(5, "Fives", 4, player);
+        output += " " + getNumber(6, "Sixes", 5, player);
         
         //Lower Section
-        
         //Three of a Kind
         output += getOfAKind(3, "Three Of A Kind", 6, player);
         
@@ -210,7 +212,7 @@ public class Yahtzee {
                 }
             }        
             currentPossibleValues[index] = amount;
-            return " " + name + ": " + amount;
+            return name + ": " + amount;
             
         }
         return "";
